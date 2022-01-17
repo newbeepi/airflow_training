@@ -13,9 +13,9 @@ from postgres_operators import PostgreSqlCountRowsOperator
 
 
 config = {
-   'dag_id_1': {'schedule_interval': "", "start_date": datetime(2021, 10, 18), "tablename": "new_table_1", "queue": "jobs_queue"},  
-   'dag_id_2': {'schedule_interval': "", "start_date": datetime(2018, 10, 18), "tablename": "new_table_2", "queue": "jobs_queue"},  
-   'dag_id_3': {'schedule_interval': "", "start_date": datetime(2018, 10, 18), "tablename": "new_table_3", "queue": "jobs_queue"}
+   'dag_id_1': {'schedule_interval': "", "start_date": datetime.today(), "tablename": "new_table_1"},  
+   'dag_id_2': {'schedule_interval': "", "start_date": datetime.today(), "tablename": "new_table_2", "queue": "jobs_queue"},  
+   'dag_id_3': {'schedule_interval': "", "start_date": datetime.today(), "tablename": "new_table_3", "queue": "jobs_queue"}
 }
 
 
@@ -41,8 +41,7 @@ def check_table_exists(tablename):
     print(query)
     if query:
         return "insert_row"
-    else:
-        return "create_table"
+    return "create_table"
 
 # def query_postgres_table(tablename):
 #     hook = PostgresHook()
@@ -54,6 +53,7 @@ def check_table_exists(tablename):
 for dag_id, params in config.items():
     with DAG(dag_id=dag_id, default_args=params, ) as dag:
         process_start = DummyOperator(task_id="print_process_start")
+        
         check_table = BranchPythonOperator(
             task_id="check_table_exists",
             python_callable=check_table_exists,
@@ -63,6 +63,7 @@ for dag_id, params in config.items():
             task_id="get_current_user", 
             bash_command="whoami",
         )
+
         create_table_sql = """CREATE TABLE %s (
         custom_id INTEGER NOT NULL,
         user_name VARCHAR (50) NOT NULL,

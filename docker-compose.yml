@@ -95,7 +95,7 @@ services:
         - initdb
       deploy:
         restart_policy:
-          condition: any
+          condition: always
           delay: 5s
           window: 120s
       networks:
@@ -172,7 +172,7 @@ services:
         - ./logs:/opt/airflow/logs
         - ./files:/opt/airflow/files
         - /var/run/docker.sock:/var/run/docker.sock
-      command: celery worker -H jobs_queue
+      command: airflow celery worker -q jobs_queue
       depends_on:
         - scheduler
       deploy:

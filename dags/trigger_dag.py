@@ -1,5 +1,6 @@
 from airflow import DAG
 from airflow.sensors.external_task import ExternalTaskSensor
+from airflow.sensors.filesystem import FileSensor
 from airflow.operators.python import PythonOperator
 from airflow.operators.bash import BashOperator
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
@@ -14,12 +15,11 @@ from sensors.smart_file_sensor import SmartFileSensor
 
 
 default_args = {
-    "schedule_interval": "",
-    "start_date": datetime(2021, 10, 24)
+    "schedule_interval": "@once",
+    "start_date": datetime.today()
 }
 dag_to_monitor = "dag_id_1"
 path_to_run = Variable.get("path_to_run")
-
 
 
 def print_result(ti):
@@ -29,10 +29,10 @@ def print_result(ti):
 
     
 with DAG('trigger_dag', default_args=default_args) as dag:
-    file_sensor = SmartFileSensor(
-        task_id = 'sensor_wait_run_file',
+    file_sensor = FileSensor(
+        task_id="sensor_wait_run_file",
         filepath=path_to_run,
-        fs_conn_id='fs_default'
+        fs_conn_id="fs_default"
     )
 
     trigger_dag = TriggerDagRunOperator(task_id="trigger_dag", trigger_dag_id=dag_to_monitor, execution_date=" {{execution_date}} ")
